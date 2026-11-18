@@ -697,7 +697,17 @@ details.rank-celeb textarea{width:100%;max-width:100%;min-height:50px;margin:4px
               <div class="row">
                 <button class="btn small primary bigbtn" id="meetJoinJitsiBtn">🎥 ورود به کنفرانس</button>
               </div>
-              
+              <div class="row">
+                <select id="meetServerSelM" title="سرور ویدیو">
+                  <option value="meet.mayfirst.org">🌐 mayfirst — بدون لاگین ✅ (پیشنهادی)</option>
+                  <option value="calls.disroot.org">🌐 disroot — بدون لاگین</option>
+                  <option value="meet.systemli.org">🌐 systemli — بدون لاگین</option>
+                  <option value="meet.jit.si">🌐 jit.si — نیاز به لاگین</option>
+                </select>
+              </div>
+              <div class="meet-srv-note">⚠️ سرور تو و ادمین باید یکی باشه — معمولاً خودکار سینک می‌شه. اگه تصویر همو ندیدید چک کنید هر دو روی همون سرور باشید.</div>
+              <div class="meet-link">سرور: <b dir="ltr" id="meetJoinServerTxt">—</b></div>
+              <div class="meet-link">لینک: <b dir="ltr" id="meetJoinLinkTxt">—</b></div>
             </div>
             <div class="meet-card" id="meetAdminCard">
               <h3>⚙️ کنترل ادمین</h3>
@@ -2337,6 +2347,8 @@ function renderMeet(){
   var link=document.getElementById("meetLinkTxt"); if(link)link.textContent=meetLink();
   try{var _srv=document.getElementById("meetServerSel"); if(_srv&&document.activeElement!==_srv)_srv.value=meetServer();}catch(e){}
   try{var link2=document.getElementById("meetJoinLinkTxt"); if(link2)link2.textContent=meetLink();}catch(e){}
+  try{var _srvM=document.getElementById("meetServerSelM"); if(_srvM&&document.activeElement!==_srvM)_srvM.value=meetServer();}catch(e){}
+  try{var _jsrv=document.getElementById("meetJoinServerTxt"); if(_jsrv)_jsrv.textContent=meetServer();}catch(e){}
   // admin card visibility
   var ac=document.getElementById("meetAdminCard"); if(ac)ac.style.display=adm?"":"none";
   try{var _rq=document.getElementById("meetReqs"); if(_rq){var _card=_rq.closest(".meet-card"); if(_card)_card.style.display=adm?"":"none";}}catch(e){}
@@ -2449,6 +2461,7 @@ function renderMeet(){
       if(myM3&&myM3.allowAll)hint.innerHTML="👁 دسترسی کامل: همه را می‌بینید";
       else hint.innerHTML="🔒 دسترسی محدود: فقط خودتان + ادمین";
     }
+    try{var _bx=document.getElementById("jitsiBox"); if(_bx&&_bx.style.display!=="none")hint.innerHTML+=" • 🎥 تصویر زنده همه داخل قاب مشکی بالاست — کاشی‌های پایین فقط وضعیت حضور است";}catch(e){}
   }
 }
 
@@ -2458,7 +2471,7 @@ function meetSyncVideo(){
     var open=box&&box.style.display!=="none";
     if(st)st.classList.toggle("has-video",!!open);
     var rl=document.getElementById("meetRoomLabel"); if(rl)rl.textContent=MEET.room||"—";
-    var jr=document.getElementById("meetJitsiRoom"); if(jr)jr.textContent=MEET.room||"—";
+    var jr=document.getElementById("meetJitsiRoom"); if(jr)jr.textContent=(MEET.room||"—")+" • "+meetServer();
     document.querySelectorAll("[data-mlay]").forEach(function(x){x.classList.toggle("on",(x.getAttribute("data-mlay")===(MEET.layout||"grid")));});
     try{if(box){if(!MEET.jitsiSize)MEET.jitsiSize="m";box.setAttribute("data-size",MEET.jitsiSize);}document.querySelectorAll("[data-jsize]").forEach(function(x){x.classList.toggle("on",(x.getAttribute("data-jsize")===(MEET.jitsiSize||"m")));});}catch(e){}
   }catch(e){}
@@ -2531,6 +2544,7 @@ function meetInit(){
     };
     var lo=document.getElementById("meetLobbyChk"); if(lo)lo.onchange=()=>{MEET.lobby=lo.checked;meetSave();meetCloudPush();};
     var ssel=document.getElementById("meetServerSel"); if(ssel)ssel.onchange=()=>{MEET.server=ssel.value;meetSave();try{meetCloudPush();}catch(e){}try{renderMeet();}catch(e){}toast("🌐 سرور ویدیو: "+meetServer());};
+    var sselM=document.getElementById("meetServerSelM"); if(sselM)sselM.onchange=()=>{MEET.server=sselM.value;meetSave();try{meetCloudPush();}catch(e){}try{renderMeet();}catch(e){}toast("🌐 سرور ویدیو: "+meetServer());};
     document.querySelectorAll("[data-mlay]").forEach(b=>b.onclick=()=>{
       MEET.layout=b.getAttribute("data-mlay");meetSave();meetCloudPush();renderMeet();
       document.querySelectorAll("[data-mlay]").forEach(x=>x.classList.remove("on"));b.classList.add("on");
