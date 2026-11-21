@@ -2121,7 +2121,8 @@ var CLOUD={enabled:false,token:"",gist:"",file:"serge-data.json",interval:10};
 try{ var _c=JSON.parse(localStorage.getItem("serge_cloud_v1")||"null"); if(_c){ for(var _k in _c) CLOUD[_k]=_c[_k]; } }catch(e){}
 var _cloudPushT=null,_cloudPollT=null,_lastPushedSig="",_lastPullAt=0,_cloudBusy=false;
 var _lastPushedTableSig="";
-function fullTableSig(){ try{ return STORES.length+"|"+USERS.length+"|"+(CUSTOM?CUSTOM.length:0)+"|"+JSON.stringify(SET).length+"|"+JSON.stringify(STORES).length; }catch(e){ return ""; } }
+function _tblHash(s){ try{ var h=5381; s=String(s||""); for(var i=0;i<s.length;i++){ h=((h<<5)+h+s.charCodeAt(i))|0; } return (h>>>0).toString(36); }catch(e){ return "0"; } }
+function fullTableSig(){ try{ return STORES.length+"|"+USERS.length+"|"+(CUSTOM?CUSTOM.length:0)+"|"+_tblHash(JSON.stringify(SET))+"|"+_tblHash(JSON.stringify(STORES))+"|"+_tblHash(JSON.stringify(USERS))+"|"+_tblHash(JSON.stringify(CUSTOM)); }catch(e){ return ""; } }
 function saveLocalOnly(){ try{localStorage.setItem("serge_set_v1",JSON.stringify(SET));localStorage.setItem("serge_stores_v1",JSON.stringify(STORES));localStorage.setItem("serge_users_v1",JSON.stringify(USERS));localStorage.setItem("serge_cols_v1",JSON.stringify(CUSTOM));}catch(e){} try{localStorage.setItem("serge_voices_v1",JSON.stringify(VOICES))}catch(e){} try{localStorage.setItem("serge_meet_v1",JSON.stringify(MEET))}catch(e){} }
 function mergeMeetCloud(remoteMeet,localMeet){ try{ if(!remoteMeet) return localMeet; if(!localMeet) return remoteMeet; var out=JSON.parse(JSON.stringify(remoteMeet)); var me=""; try{ var _cu=curUser(); me=_cu?_cu.u:""; }catch(e){} try{ var rm=remoteMeet.members||{}, lm=localMeet.members||{}, nm={}; var keys={}; Object.keys(rm).forEach(function(k){keys[k]=1}); Object.keys(lm).forEach(function(k){keys[k]=1}); Object.keys(keys).forEach(function(k){ if(k===me&&lm[k]){ nm[k]=lm[k]; } else { nm[k]=rm[k]||lm[k]; } }); out.members=nm; }catch(e){} try{ var rqMap={}; (remoteMeet.requests||[]).forEach(function(r){ if(r&&r.id) rqMap[r.id]=r; }); (localMeet.requests||[]).forEach(function(r){ if(r&&r.id&&!rqMap[r.id]) rqMap[r.id]=r; }); out.requests=Object.keys(rqMap).map(function(k){return rqMap[k]}); }catch(e){} return out; }catch(e){ return localMeet; } }
 function voiceSig(){ try{ var mx=0; (VOICES||[]).forEach(function(v){ mx=Math.max(mx,v.updatedAt||v.ts||0); }); return VOICES.length+"|"+mx; }catch(e){ return ""; } }
@@ -2192,8 +2193,10 @@ function cloudPull(manual){
     var changed=(ns!==voiceSig());
     if(changed){ VOICES=merged; }
     var tableChanged=false;
+    var _hasPendingPush=false; try{ _hasPendingPush=!!_cloudPushT; }catch(e){}
     try{
-      if(d.SET&&d.STORES&&Array.isArray(d.STORES)&&d.STORES.length>0){
+      if(_hasPendingPush){ /* V20: local table newer (push pending) — skip overwrite this round */ }
+      else if(d.SET&&d.STORES&&Array.isArray(d.STORES)&&d.STORES.length>0){
         var oldSig=""; try{oldSig=fullTableSig();}catch(e){}
         SET=d.SET; try{if(typeof ensureSet==="function")ensureSet();}catch(e){}
         STORES=d.STORES;
@@ -2222,6 +2225,7 @@ function cloudPull(manual){
     if(changed||tableChanged||meetChanged){
       try{saveLocalOnly();}catch(e){ try{save()}catch(_e){} }
       try{renderAll();}catch(e){}
+      try{if(typeof renderUsers==="function")renderUsers();}catch(e){}
       try{renderVoice()}catch(e){} try{updateVoiceBadge()}catch(e){}
       try{renderMeet();}catch(e){}
       _lastPushedSig=voiceSig(); try{_lastPushedTableSig=fullTableSig();}catch(e){}
@@ -2243,6 +2247,7 @@ function cloudPull(manual){
 }
 function cloudPush(manual){
   if(!cloudOn()) return Promise.resolve(false);
+  try{_cloudPushT=null;}catch(e){}
   if(_cloudBusy){ if(manual) toast("⏳ صبر کنید…"); return Promise.resolve(false); }
   var sig=""; try{sig=voiceSig();}catch(e){}
   var tSig=""; try{tSig=fullTableSig();}catch(e){}
@@ -2286,7 +2291,7 @@ function cloudPush(manual){
     return false;
   });
 }
-function cloudDirty(){ if(!cloudOn()) return; try{ clearTimeout(_cloudPushT); }catch(e){} _cloudPushT=setTimeout(function(){ cloudPush(false); },2500); }
+function cloudDirty(){ if(!cloudOn()) return; try{ clearTimeout(_cloudPushT); }catch(e){} _cloudPushT=setTimeout(function(){ try{_cloudPushT=null;}catch(e){} cloudPush(false); },2500); }
 function cloudTest(){ if(!CLOUD.token||!CLOUD.gist) return toast("توکن و شناسه را وارد کنید"); cloudStatus("☁️ در حال تست…","#eab308"); cloudGetRemote().then(function(d){ var n=(d.voices||d.VOICES||[]).length; var _sn=0; try{_sn=(d.STORES||[]).length;}catch(e){} cloudStatus("☁️ تست موفق 🟢 | "+_sn+" فروشگاه • "+n+" پیام در ابر","#22c55e"); toast("☁️ اتصال درست است — "+_sn+" فروشگاه • "+n+" پیام ✅"); }).catch(function(e){ cloudStatus("☁️ خطا: "+e.message,"#ef4444"); toast("⛔ "+e.message); }); }
 function cloudRefreshRole(){
   try{
@@ -2307,7 +2312,7 @@ function cloudInit(){
     paint(); try{cloudRefreshRole();}catch(e){}
     document.getElementById("cloudSaveBtn").onclick=function(){ CLOUD.enabled=en.checked; CLOUD.token=(tk.value||"").trim(); CLOUD.gist=(gs.value||"").trim(); CLOUD.interval=Math.max(5,Math.min(120,+iv.value||10)); cloudSaveCfg(); paint(); toast("💾 اتصال ابری ذخیره شد"); if(cloudOn()) cloudPull(true); };
     document.getElementById("cloudTestBtn").onclick=cloudTest;
-    document.getElementById("cloudSyncBtn").onclick=function(){ cloudPush(true); setTimeout(function(){cloudPull(true);},1200); };
+    document.getElementById("cloudSyncBtn").onclick=function(){ cloudPush(true).then(function(){ return cloudPull(true); }); };
     document.getElementById("cloudToggleBtn").onclick=function(){ var b=document.getElementById("cloudBox"); if(b) b.classList.toggle("hidden"); };
     document.getElementById("cloudCopyCodeBtn").onclick=function(){
       if(!CLOUD.token||!CLOUD.gist) return toast("اول توکن و شناسه را ذخیره کنید");
