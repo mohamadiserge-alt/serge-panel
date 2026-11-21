@@ -610,7 +610,7 @@ details.rank-celeb textarea{width:100%;max-width:100%;min-height:50px;margin:4px
 </div>
 <div id="cloudBox" style="background:rgba(255,255,255,.05);border:1px dashed rgba(255,255,255,.25);border-radius:12px;padding:12px;margin:0 0 10px;font-size:.75rem;line-height:2">
 <div style="font-weight:900;margin-bottom:4px">☁️ اتصال ابری (اینترنت — بدون شیر ویندوزی)</div>
-<div id="cloudDescAdmin" style="color:var(--muted)">با این بخش، پیام‌های «تعاملات مدیریتی» بین همه سیستم‌ها (شما + فروشگاه‌ها) با اینترنت جابه‌جا می‌شود. فقط یک‌بار ادمین وصل می‌کند و به فروشگاه‌ها «کد اتصال» می‌دهد. تا وقتی وصل نیست، هر سیستم فقط پیام‌های خودش را می‌بیند (همان مشکلی که گفتید).</div>
+<div id="cloudDescAdmin" style="color:var(--muted)">با این بخش، <b>همه اطلاعات</b> (جدول امتیازها + تنظیمات + کاربرها + تعاملات مدیریتی + ویدیو کنفرانس) بین همه سیستم‌ها با اینترنت جابه‌جا می‌شود. فقط یک‌بار ادمین وصل می‌کند و به فروشگاه‌ها «کد اتصال» می‌دهد. تا وقتی وصل نیست، هر سیستم فقط اطلاعات خودش را می‌بیند.</div>
 <div id="cloudDescManager" style="color:var(--muted);display:none">کد اتصالی که از مدیریت دریافت کرده‌اید را در کادر زیر بچسبانید و دکمه «وصل شدن با کد» را بزنید. از این به بعد پیام‌ها خودکار همگام می‌شود.</div>
 <div id="cloudAdminOnly">
 <label style="display:flex;align-items:center;gap:6px;margin-top:6px"><input type="checkbox" id="cloudEnabled"> فعال‌سازی همگام‌سازی اینترنتی</label>
@@ -633,9 +633,9 @@ details.rank-celeb textarea{width:100%;max-width:100%;min-height:50px;margin:4px
 <div style="line-height:2.1">
 ۱- در github.com یک حساب بسازید و وارد شوید.<br>
 ۲- این صفحه را باز کنید: <b dir="ltr">github.com/settings/tokens/new?scopes=gist&description=serge-panel</b> — تیک <b dir="ltr">gist</b> را بزنید و <b>Generate</b> کنید. توکن را کپی کنید (با <b dir="ltr">ghp_</b> شروع می‌شود).<br>
-۳- به <b dir="ltr">gist.github.com</b> بروید، یک فایل به اسم <b dir="ltr">serge-data.json</b> با محتوای <b dir="ltr">{"v":8,"voices":[]}</b> بسازید و <b>Create secret gist</b> را بزنید. شناسه (حروف آخر آدرس) را کپی کنید.<br>
+۳- به <b dir="ltr">gist.github.com</b> بروید، یک فایل به اسم <b dir="ltr">serge-data.json</b> با محتوای <b dir="ltr">{"v":9,"voices":[]}</b> بسازید و <b>Create secret gist</b> را بزنید. شناسه (حروف آخر آدرس) را کپی کنید.<br>
 ۴- همین‌جا توکن + شناسه را بچسبانید، «فعال‌سازی» را تیک بزنید و «ذخیره اتصال» را بزنید، بعد «تست اتصال».<br>
-۵- «کپی کد اتصال» را بزنید و در واتساپ برای هر فروشگاه بفرستید. آن‌ها همین فایل را باز می‌کنند، وارد همین بخش می‌شوند، کد را می‌چسبانند و «وصل شدن با کد» را می‌زنند. تمام — از این به بعد پیام‌ها خودکار بین همه می‌چرخد.<br>
+۵- «کپی کد اتصال» را بزنید و در واتساپ برای هر فروشگاه بفرستید. آن‌ها همین فایل را باز می‌کنند، وارد همین بخش می‌شوند، کد را می‌چسبانند و «وصل شدن با کد» را می‌زنند. تمام — از این به بعد <b>جدول + پیام‌ها</b> خودکار بین همه می‌چرخد.<br>۶- بعد از هر تغییر در جدول، دکمه «💾 ذخیره» را بزنید — ۲ تا ۳ ثانیه بعد خودکار به ابر می‌رود. با دکمه «🔄 همگام‌سازی» هم می‌توانید دستی بفرستید/بگیرید.<br>
 <span style="color:var(--muted)">نکته امنیتی: توکن را جایی عمومی نگذارید؛ فقط برای همین تیم است. توکن فقط به همین یک فایل gist دسترسی دارد.</span>
 </div></details>
 </div>
@@ -897,7 +897,7 @@ function ensureUserPerms(){try{if(!Array.isArray(USERS))return;USERS.forEach(fun
 ensureUserPerms();
 let session=JSON.parse(sessionStorage.getItem("serge_session")||"null");
 function load(k,f){try{const v=localStorage.getItem(k);return v?JSON.parse(v):f}catch(e){return f}}
-function save(){localStorage.setItem("serge_set_v1",JSON.stringify(SET));localStorage.setItem("serge_stores_v1",JSON.stringify(STORES));localStorage.setItem("serge_users_v1",JSON.stringify(USERS));localStorage.setItem("serge_cols_v1",JSON.stringify(CUSTOM));try{localStorage.setItem("serge_voices_v1",JSON.stringify(VOICES))}catch(e){}}
+function save(){ try{saveLocalOnly();}catch(e){ try{localStorage.setItem("serge_set_v1",JSON.stringify(SET));localStorage.setItem("serge_stores_v1",JSON.stringify(STORES));localStorage.setItem("serge_users_v1",JSON.stringify(USERS));localStorage.setItem("serge_cols_v1",JSON.stringify(CUSTOM));}catch(_e){} try{localStorage.setItem("serge_voices_v1",JSON.stringify(VOICES))}catch(_e){} } try{if(typeof cloudDirty==="function")cloudDirty();}catch(e){} }
 /* ================= HELPERS ================= */
 const $=s=>document.querySelector(s);
 const faN=n=>{if(n==null||isNaN(n))return"—";return Number(n).toLocaleString("fa-IR")};
@@ -2122,6 +2122,10 @@ function renderVoice(){
 var CLOUD={enabled:false,token:"",gist:"",file:"serge-data.json",interval:10};
 try{ var _c=JSON.parse(localStorage.getItem("serge_cloud_v1")||"null"); if(_c){ for(var _k in _c) CLOUD[_k]=_c[_k]; } }catch(e){}
 var _cloudPushT=null,_cloudPollT=null,_lastPushedSig="",_lastPullAt=0,_cloudBusy=false;
+var _lastPushedTableSig="";
+function fullTableSig(){ try{ return STORES.length+"|"+USERS.length+"|"+(CUSTOM?CUSTOM.length:0)+"|"+JSON.stringify(SET).length+"|"+JSON.stringify(STORES).length; }catch(e){ return ""; } }
+function saveLocalOnly(){ try{localStorage.setItem("serge_set_v1",JSON.stringify(SET));localStorage.setItem("serge_stores_v1",JSON.stringify(STORES));localStorage.setItem("serge_users_v1",JSON.stringify(USERS));localStorage.setItem("serge_cols_v1",JSON.stringify(CUSTOM));}catch(e){} try{localStorage.setItem("serge_voices_v1",JSON.stringify(VOICES))}catch(e){} try{localStorage.setItem("serge_meet_v1",JSON.stringify(MEET))}catch(e){} }
+function mergeMeetCloud(remoteMeet,localMeet){ try{ if(!remoteMeet) return localMeet; if(!localMeet) return remoteMeet; var out=JSON.parse(JSON.stringify(remoteMeet)); var me=""; try{ var _cu=curUser(); me=_cu?_cu.u:""; }catch(e){} try{ var rm=remoteMeet.members||{}, lm=localMeet.members||{}, nm={}; var keys={}; Object.keys(rm).forEach(function(k){keys[k]=1}); Object.keys(lm).forEach(function(k){keys[k]=1}); Object.keys(keys).forEach(function(k){ if(k===me&&lm[k]){ nm[k]=lm[k]; } else { nm[k]=rm[k]||lm[k]; } }); out.members=nm; }catch(e){} try{ var rqMap={}; (remoteMeet.requests||[]).forEach(function(r){ if(r&&r.id) rqMap[r.id]=r; }); (localMeet.requests||[]).forEach(function(r){ if(r&&r.id&&!rqMap[r.id]) rqMap[r.id]=r; }); out.requests=Object.keys(rqMap).map(function(k){return rqMap[k]}); }catch(e){} return out; }catch(e){ return localMeet; } }
 function voiceSig(){ try{ var mx=0; (VOICES||[]).forEach(function(v){ mx=Math.max(mx,v.updatedAt||v.ts||0); }); return VOICES.length+"|"+mx; }catch(e){ return ""; } }
 function cloudSaveCfg(){ try{ localStorage.setItem("serge_cloud_v1",JSON.stringify(CLOUD)); }catch(e){} }
 function cloudStatus(txt,color){ try{ var el=document.getElementById("cloudTxt"); if(el) el.textContent=txt; var d=document.getElementById("cloudDot"); if(d) d.style.background=color||"#999"; }catch(e){} }
@@ -2188,13 +2192,50 @@ function cloudPull(manual){
     var merged=mergeVoices(VOICES,remote);
     var ns=merged.length+"|"+(function(){var m=0;merged.forEach(function(v){m=Math.max(m,v.updatedAt||v.ts||0);});return m;})();
     var changed=(ns!==voiceSig());
-    if(changed){ VOICES=merged; try{voiceEnsure()}catch(e){} try{save()}catch(e){} try{renderVoice()}catch(e){} try{updateVoiceBadge()}catch(e){} _lastPushedSig=voiceSig(); }
+    if(changed){ VOICES=merged; }
+    var tableChanged=false;
+    try{
+      if(d.SET&&d.STORES&&Array.isArray(d.STORES)&&d.STORES.length>0){
+        var oldSig=""; try{oldSig=fullTableSig();}catch(e){}
+        SET=d.SET; try{if(typeof ensureSet==="function")ensureSet();}catch(e){}
+        STORES=d.STORES;
+        if(d.USERS&&Array.isArray(d.USERS)&&d.USERS.length>0) USERS=d.USERS;
+        if(d.CUSTOM&&Array.isArray(d.CUSTOM)) CUSTOM=d.CUSTOM;
+        try{if(typeof ensureUserPerms==="function")ensureUserPerms();}catch(e){}
+        try{if(typeof voiceEnsure==="function")voiceEnsure();}catch(e){}
+        var newSig=""; try{newSig=fullTableSig();}catch(e){}
+        if(oldSig!==newSig) tableChanged=true;
+      }
+    }catch(e){}
+    var meetChanged=false;
+    try{
+      if(d&&d.meet){
+        var beforeM=JSON.stringify(MEET.requests||[])+JSON.stringify(MEET.active)+JSON.stringify(MEET.room)+JSON.stringify(MEET.server);
+        var selfKey=""; try{var _cu2=curUser(); selfKey=_cu2?_cu2.u:"";}catch(e){}
+        var selfKeep=null; try{ if(selfKey&&MEET.members&&MEET.members[selfKey]) selfKeep=JSON.parse(JSON.stringify(MEET.members[selfKey])); }catch(e){}
+        MEET=d.meet; try{meetSave();}catch(e){}
+        try{ if(selfKey&&selfKeep){ if(!MEET.members) MEET.members={}; if(!MEET.members[selfKey]) MEET.members[selfKey]=selfKeep; else { if(selfKeep.online) MEET.members[selfKey].online=true; } try{meetSave();}catch(e){} } }catch(e){}
+        try{ if(typeof meetEnsureSelf==="function") meetEnsureSelf(); }catch(e){}
+        var afterM=JSON.stringify(MEET.requests||[])+JSON.stringify(MEET.active)+JSON.stringify(MEET.room)+JSON.stringify(MEET.server);
+        if(beforeM!==afterM) meetChanged=true;
+        try{var _mr=JSON.stringify((MEET.requests||[]).map(function(r){return r.id;})); if(typeof _meetLastReqIds!=="undefined") _meetLastReqIds=_mr;}catch(e){}
+      }
+    }catch(e){}
+    if(changed||tableChanged||meetChanged){
+      try{saveLocalOnly();}catch(e){ try{save()}catch(_e){} }
+      try{renderAll();}catch(e){}
+      try{renderVoice()}catch(e){} try{updateVoiceBadge()}catch(e){}
+      try{renderMeet();}catch(e){}
+      _lastPushedSig=voiceSig(); try{_lastPushedTableSig=fullTableSig();}catch(e){}
+    }
     _lastPullAt=Date.now();
     try{ localStorage.setItem("serge_cloud_last",""+_lastPullAt); }catch(e){}
     var dt=new Date(_lastPullAt).toLocaleTimeString("fa-IR",{hour:"2-digit",minute:"2-digit"});
-    cloudStatus("☁️ همگام‌سازی اینترنتی: 🟢 وصل | آخرین sync ساعت "+dt+" | "+VOICES.length+" پیام","#22c55e");
-    if(manual) toast(changed?"☁️ پیام‌های جدید از ابر گرفته شد ✅":"☁️ به‌روز هستید — پیام جدیدی نبود");
-    _cloudBusy=false; return changed;
+    var sc2=0; try{sc2=STORES.length;}catch(e){}
+    cloudStatus("☁️ همگام‌سازی: 🟢 وصل | "+dt+" | "+sc2+" فروشگاه • "+VOICES.length+" پیام","#22c55e");
+    if(manual) toast((changed||tableChanged||meetChanged)?"☁️ به‌روز شد ✅ (جدول + پیام‌ها)":"☁️ به‌روز هستید — چیز جدیدی نبود");
+    else { try{ if(typeof meetIsAdmin==="function"&&meetIsAdmin()&&meetChanged){ var _news=(MEET.requests||[]); if(_news.length) { try{toast("🔔 درخواست ورود جدید");}catch(e){} try{meetBeep();}catch(e){} } } }catch(e){} }
+    _cloudBusy=false; return (changed||tableChanged||meetChanged);
   }).catch(function(err){
     _cloudBusy=false;
     cloudStatus("☁️ همگام‌سازی: 🔴 خطا — "+(err.message||err),"#ef4444");
@@ -2205,20 +2246,40 @@ function cloudPull(manual){
 function cloudPush(manual){
   if(!cloudOn()) return Promise.resolve(false);
   if(_cloudBusy){ if(manual) toast("⏳ صبر کنید…"); return Promise.resolve(false); }
-  var sig=voiceSig();
-  if(!manual&&sig===_lastPushedSig) return Promise.resolve(false);
+  var sig=""; try{sig=voiceSig();}catch(e){}
+  var tSig=""; try{tSig=fullTableSig();}catch(e){}
+  var isAdm=false; try{isAdm=isAdmin();}catch(e){}
+  if(!manual&&sig===_lastPushedSig&&tSig===_lastPushedTableSig) return Promise.resolve(false);
   _cloudBusy=true; if(manual) cloudStatus("☁️ در حال ارسال به ابر…","#eab308");
   return cloudGetRemote().then(function(d){
     var remote=d.voices||d.VOICES||[];
     var merged=mergeVoices(VOICES,remote);
-    VOICES=merged; try{voiceEnsure()}catch(e){} try{save()}catch(e){} try{renderVoice()}catch(e){} try{updateVoiceBadge()}catch(e){}
-    var payload={v:8,updatedAt:Date.now(),voices:VOICES};
+    VOICES=merged; try{voiceEnsure()}catch(e){}
+    var payload;
+    if(isAdm){
+      payload={v:9,updatedAt:Date.now(),SET:SET,STORES:STORES,USERS:USERS,CUSTOM:CUSTOM,voices:VOICES,meet:JSON.parse(JSON.stringify(MEET))};
+    }else{
+      var mMeet=d.meet||MEET;
+      try{ mMeet=mergeMeetCloud(d.meet,MEET); }catch(e){ mMeet=MEET; }
+      try{ MEET=mMeet; meetSave(); }catch(e){}
+      payload={v:9,updatedAt:d.updatedAt||Date.now(),voices:VOICES,meet:MEET};
+      if(d.SET&&d.STORES&&Array.isArray(d.STORES)&&d.STORES.length>0){ payload.SET=d.SET; payload.STORES=d.STORES; payload.USERS=d.USERS; payload.CUSTOM=d.CUSTOM; }
+      else { payload.SET=SET; payload.STORES=STORES; payload.USERS=USERS; payload.CUSTOM=CUSTOM; }
+      if(!payload.USERS||!payload.USERS.length) payload.USERS=USERS;
+      if(!payload.CUSTOM) payload.CUSTOM=CUSTOM;
+      if(!payload.SET) payload.SET=SET;
+      if(!payload.STORES) payload.STORES=STORES;
+    }
+    try{saveLocalOnly();}catch(e){}
+    try{renderVoice()}catch(e){} try{updateVoiceBadge()}catch(e){}
     return cloudPutMerged(payload);
   }).then(function(){
-    _lastPushedSig=voiceSig(); _lastPullAt=Date.now();
+    _lastPushedSig=voiceSig(); try{_lastPushedTableSig=fullTableSig();}catch(e){} _lastPullAt=Date.now();
+    try{ localStorage.setItem("serge_cloud_last",""+_lastPullAt); }catch(e){}
     var dt=new Date(_lastPullAt).toLocaleTimeString("fa-IR",{hour:"2-digit",minute:"2-digit"});
-    cloudStatus("☁️ همگام‌سازی اینترنتی: 🟢 وصل | آخرین sync ساعت "+dt+" | "+VOICES.length+" پیام","#22c55e");
-    if(manual) toast("☁️ ارسال شد ✅");
+    var sc=0; try{sc=STORES.length;}catch(e){}
+    cloudStatus("☁️ همگام‌سازی: 🟢 وصل | "+dt+" | "+sc+" فروشگاه • "+VOICES.length+" پیام","#22c55e");
+    if(manual) toast("☁️ ارسال شد ✅ (جدول + پیام‌ها)");
     _cloudBusy=false; return true;
   }).catch(function(err){
     _cloudBusy=false;
@@ -2228,7 +2289,7 @@ function cloudPush(manual){
   });
 }
 function cloudDirty(){ if(!cloudOn()) return; try{ clearTimeout(_cloudPushT); }catch(e){} _cloudPushT=setTimeout(function(){ cloudPush(false); },2500); }
-function cloudTest(){ if(!CLOUD.token||!CLOUD.gist) return toast("توکن و شناسه را وارد کنید"); cloudStatus("☁️ در حال تست…","#eab308"); cloudGetRemote().then(function(d){ var n=(d.voices||d.VOICES||[]).length; cloudStatus("☁️ تست موفق 🟢 | "+n+" پیام در ابر","#22c55e"); toast("☁️ اتصال درست است — "+n+" پیام در ابر ✅"); }).catch(function(e){ cloudStatus("☁️ خطا: "+e.message,"#ef4444"); toast("⛔ "+e.message); }); }
+function cloudTest(){ if(!CLOUD.token||!CLOUD.gist) return toast("توکن و شناسه را وارد کنید"); cloudStatus("☁️ در حال تست…","#eab308"); cloudGetRemote().then(function(d){ var n=(d.voices||d.VOICES||[]).length; var _sn=0; try{_sn=(d.STORES||[]).length;}catch(e){} cloudStatus("☁️ تست موفق 🟢 | "+_sn+" فروشگاه • "+n+" پیام در ابر","#22c55e"); toast("☁️ اتصال درست است — "+_sn+" فروشگاه • "+n+" پیام ✅"); }).catch(function(e){ cloudStatus("☁️ خطا: "+e.message,"#ef4444"); toast("⛔ "+e.message); }); }
 function cloudRefreshRole(){
   try{
     var adm=false; try{adm=isAdmin();}catch(e){adm=false;}
@@ -2305,7 +2366,9 @@ function meetCloudPush(){
     if(typeof cloudGetRemote!=="function"||typeof cloudPutMerged!=="function")return;
     cloudGetRemote().then(function(d){
       d.meet=JSON.parse(JSON.stringify(MEET));
-      if(!d.v)d.v=8; if(!d.voices)d.voices=(typeof VOICES!=="undefined"?VOICES:[]);
+      if(!d.v)d.v=9; d.updatedAt=Date.now();
+      if(!d.voices)d.voices=(typeof VOICES!=="undefined"?VOICES:[]);
+      try{ var _adm=false; try{_adm=isAdmin();}catch(e){} if(_adm){ d.SET=SET; d.STORES=STORES; d.USERS=USERS; d.CUSTOM=CUSTOM; } }catch(e){}
       return cloudPutMerged(d);
     }).catch(()=>{});
   }catch(e){}
