@@ -487,6 +487,7 @@ details.rank-celeb textarea{width:100%;max-width:100%;min-height:50px;margin:4px
 
 
 
+.edit-hint,.col-hint{display:none!important}
 </style>
 </head>
 <body>
@@ -575,9 +576,9 @@ details.rank-celeb textarea{width:100%;max-width:100%;min-height:50px;margin:4px
     <section id="page-voice" class="hidden">
 <div class="panel glass">
 <h2>📣 تعاملات مدیریتی</h2>
-<div class="sub">ارتباط مستقیم مدیران فروشگاه‌ها با <b>معاونت منابع انسانی (آقای رهبری)</b> — دیدگاه‌ها، دغدغه‌ها و ایده‌های اجرایی. هر بخش صندوق <b>ارسال</b> و <b>دریافت</b> جدا دارد، رشته هر پیام از شروع تا پایان پشت‌سرهم نمایش داده می‌شود و پیام‌های خوانده‌نشده هشدار دارند.</div>
+<div class="sub" style="display:none"></div>
 <div class="voice-alarm" id="voiceAlarm"></div>
-<div style="display:flex;justify-content:flex-start;margin:8px 0"><button class="btn small" id="gotoCloudBtn">🌐 اتصال اینترنت و همگام‌سازی</button></div>
+<!-- V19: gotoCloud removed -->
 <div class="voice-tabs">
 <button class="btn primary" data-vtab="voice" id="vtabVoice">📢 صدای مدیران فروشگاه</button>
 <button class="btn" data-vtab="ideas" id="vtabIdeas">💡 باشگاه ایده‌های SERGE</button>
@@ -1837,7 +1838,7 @@ function voiceMsgBubble(v, m, idx, total, canReply, canDelete){
     +quote
     +'<div class="msg-text">'+esc2(m.text)+'</div>'
     +'<div class="msg-foot"><span>'+sent+'</span><span>'+seen+'</span><span style="flex:1"></span>'+replyBtn+editBtn+delBtn+'</div>'
-    +'<div class="edit-hint" style="font-size:.64rem;color:var(--muted)">'+(editBtn?'✏️ تا قبل از مشاهده توسط طرف مقابل قابل ویرایش است':'🔒 پس از مشاهده توسط طرف مقابل قابل ویرایش نیست')+'</div>'
+    +''
     +endBadge+'</div>';
 }
 function voiceThreadCard(v, opts){
@@ -1898,7 +1899,7 @@ function renderVoice(){
     var hint=document.getElementById("voiceFormHint");
     try{
       var secName=(sec==="ideas"?"باشگاه ایده‌های SERGE":"صدای مدیران فروشگاه");
-      if(hint) hint.textContent=(adm?"معاونت منابع انسانی، آقای رهبری — ارسال جدید در «"+secName+"» با انتخاب مقصد (یا همه): در صندوق ارسال شما + صندوق دریافت آن فروشگاه می‌نشیند.":"ارسال جدید در «"+secName+"»: در صندوق ارسال شما ثبت می‌شود (تا قبل از مشاهده معاونت منابع انسانی، آقای رهبری قابل ویرایش است).");
+      if(hint){ hint.textContent=""; hint.style.display="none"; }
       var ft=document.getElementById("voiceFormTitle");
       if(ft) ft.innerHTML="📝 باکس ارسال متن — بخش «"+secName+"»";
     }catch(e){}
@@ -1967,12 +1968,14 @@ function renderVoice(){
   }catch(e){}
   if(alarm){
     if(unreadN>0){
+      try{alarm.style.display="";}catch(e){}
       alarm.classList.remove("ok");
       alarm.innerHTML="🔔 <b>"+faN(unreadN)+" پیام خوانده‌نشده</b> در «"+(sec==="ideas"?"باشگاه ایده‌ها":"صدای مدیران")+"» دارید — رشته‌های مشخص‌شده با نوار قرمز را ببینید و پاسخ دهید."
         +(onlyUnread?"":' <button class="btn small primary" id="voiceShowUnread">فقط خوانده‌نشده‌ها</button>');
     }else{
-      alarm.classList.add("ok");
-      alarm.innerHTML="✅ همه پیام‌های «"+(sec==="ideas"?"باشگاه ایده‌ها":"صدای مدیران")+"» خوانده شده‌اند. خسته نباشید! ✨";
+      try{alarm.style.display="none";}catch(e){}
+      alarm.classList.remove("ok");
+      alarm.innerHTML="";
     }
     var su=document.getElementById("voiceShowUnread");
     if(su) su.onclick=function(){ try{ document.getElementById("voiceUnreadOnly").checked=true; window._voiceUnreadOnly=true; }catch(e){} renderVoice(); };
@@ -1980,13 +1983,8 @@ function renderVoice(){
   // hints
   try{
     var oh=document.getElementById("outboxHint"), ih=document.getElementById("inboxHint");
-    if(adm){
-      if(oh) oh.textContent="ارسال‌های شما در همین بخش (اطلاعیه به فروشگاه‌ها) — "+faN(outList.length)+" رشته — پاسخ مدیران داخل همین رشته می‌آید";
-      if(ih) ih.textContent="دریافت‌ها از مدیران در همین بخش (هر فروشگاه + تاریخ/ساعت ارسال و مشاهده) — "+faN(inList.length)+" رشته — پاسخ شما داخل همین رشته ثبت می‌شود (ریپلای)";
-    }else{
-      if(oh) oh.textContent="شما فرستاده‌اید در همین بخش ("+faN(outList.length)+") — زمان ارسال + زمان مشاهده معاونت منابع انسانی، آقای رهبری روی هر پیام — پاسخ معاونت منابع انسانی، آقای رهبری داخل همین رشته می‌آید";
-      if(ih) ih.textContent="از معاونت منابع انسانی، آقای رهبری دریافت کرده‌اید در همین بخش ("+faN(inList.length)+") — پاسخ شما داخل همین رشته ثبت می‌شود";
-    }
+    if(oh){ oh.textContent=""; oh.style.display="none"; }
+    if(ih){ ih.textContent=""; ih.style.display="none"; }
   }catch(e){}
   // render
   function renderList(el, list, canReply){
